@@ -22,9 +22,6 @@
 
 #import "CDTISReplicator.h"
 
-extern NSString *const CDTISErrorDomain;
-extern NSString *const CDTISException;
-
 /**
  * Feature Tests
  */
@@ -36,24 +33,95 @@ extern NSString *const CDTISException;
 
 #endif
 
+/** The domain for IBMData errors. */
+extern NSString *const CDTISErrorDomain;
+
+/** Name of an exception that occurs when CDTIncrementalStore encounters an unexpected condition. */
+extern NSString *const CDTISException;
 
 /**
- * CDTIncrementalStore is an abstract superclass defining the API through which
- * an application can use CDTDatastore as a persistent store for a Core Data
- * application.
+ * CDTIncrementalStore errors
+ */
+typedef NS_ENUM(NSInteger, CDTIncrementalStoreErrors) {
+	/** CDTIncrementalStore encountered an unexpected error. */
+	CDTISErrorInternalError = 1,
+	/** Cannot create the local datastore at the specified path */
+	CDTISErrorBadPath,
+	/** Data model contains attribute with undefined type */
+	CDTISErrorUndefinedAttributeType,
+	/** PersistentStoreRequest has unrecognized request type */
+	CDTISErrorRequestTypeUnknown,
+	/** PersistentStoreRequest has unrecognized result type */
+	CDTISErrorResultTypeUnknown,
+	/** PersistentStoreRequest contains unsupported features or operators */
+	CDTISErrorRequestNotSupported,
+	/** Could not create replication factory for datastore */
+	CDTISErrorReplicationFactory,
+};
+
+/**
+ CDTIncrementalStore is a concrete class that allows an application to use
+ CDTDatastore as a Core Data persistent store.
+
+ If your application is not already using Core Data, see the Core Data documentation for the
+ proper setup for a persistent store. This generally involves the initialization of a persistent
+ store coordinator followed by a request to add a persistent store of a specific type to the
+ persistent store coordinator.
+
+ This setup is commonly done in the application delegate, but could be done elsewhere.
+ The common persistent store implementation is the NSSQLiteStoreType, which uses SQLite for
+ persistent storage. To use CDTDatastore for Core Data persistent storage, specify
+ `[CDTIncrementalStore type]` as the persistent store type, as follows:
+
+     #import <CDTIncrementalStore.h>
+
+     NSURL *storeURL = [docsDir URLByAppendingPathComponent:@"mystore"];
+     NSPersistentStoreCoordinator *psc = ...
+     [psc addPersistentStoreWithType:[CDTIncrementalStore type]
+                       configuration:nil
+                                 URL:storeURL
+                             options:nil
+                               error:&error])];
+
+ The pathname of the storeURL may specify a suffix, e.g. ".cdtis", but none is required and
+ no significance is given to the suffix. However, to avoid confusion, you should avoid using the
+ ".sqlite" suffix since this typically indicates a sqllite datastore.
+
+ At this point you can use Core Data normally and your changes will be saved in the
+ local CDTDatastore image.
+
+ ### Replicating to remote Cloudant datastores
+
+ CDTIncrementalStore provides methods to access the replication features of the underlying
+ CloudantSync datastore.  The CDTISReplicator class wraps a CDTReplicator of the underlying
+ CloudantSync datastore.  Use the `replicatorThatPullsFromURL:withError:` or
+ `replicatorThatPushesToURL:withError:` methods to obtain a CDTISReplicator.
+
+ ### Related documentation
+
+ * [Apple Core Data Framework Reference](https://developer.apple.com/library/ios/documentation/Cocoa/Reference/CoreData_ObjC/)
+ * [CloudantSync](https://cloudant.com/product/cloudant-features/sync/)
+ * [CDTDatastore GitHub repo](https://github.com/cloudant/CDTDatastore)
+
  */
 @interface CDTIncrementalStore : NSIncrementalStore
 
+/** @name Using a CloudantSync IncrementalStore */
+
 /**
- *  Returns the string that was used to register this incremental store
+ *  Returns a string constant that specifies the store type for a CDTIncrementalStore.
+ *
+ *  Use this method to obtain the persistent store type for the
+ *  addPersistentStoreWithType:configuration:URL:options:error: method of
+ *  [NSPersistentStoreCoordinator](https://developer.apple.com/library/ios/documentation/Cocoa/Reference/CoreDataFramework/Classes/NSPersistentStoreCoordinator_Class/).
  *
  *  @return NSString
  */
 + (NSString *)type;
 
 /**
- *  Returns an array of @ref CDTIncrementalStore objects associated with a
- *  @ref NSPersistentStoreCoordinator
+ *  Returns an array of CDTIncrementalStore objects associated with a
+ *  [NSPersistentStoreCoordinator](https://developer.apple.com/library/ios/documentation/Cocoa/Reference/CoreDataFramework/Classes/NSPersistentStoreCoordinator_Class/).
  *
  *  @param coordinator The coordinator
  *
@@ -61,50 +129,12 @@ extern NSString *const CDTISException;
  */
 + (NSArray *)storesFromCoordinator:(NSPersistentStoreCoordinator *)coordinator;
 
-typedef NS_ENUM(NSInteger, CDTIncrementalStoreErrors) {
-    CDTISErrorBadURL = 1,
-    CDTISErrorBadPath,
-    CDTISErrorNilObject,
-    CDTISErrorUndefinedAttributeType,
-    CDTISErrorObjectIDAttributeType,
-    CDTISErrorNaN,
-    CDTISErrorRevisionIDMismatch,
-    CDTISErrorExectueRequestTypeUnkown,
-    CDTISErrorExectueRequestFetchTypeUnkown,
-    CDTISErrorMetaDataMismatch,
-    CDTISErrorNoRemoteDB,
-    CDTISErrorSyncBusy,
-    CDTISErrorReplicationFactory,
-    CDTISErrorNotSupported
-};
-
 /**
- *  The databaseName is exposed in order to be able to identify the different
- *  CDTIncrementalStore objects. @see +storesFromCoordinator:coordinator
+ *  The name of the database associated with this CDTIncrementalStore.
  */
 @property (nonatomic, strong) NSString *databaseName;
 
-/**
- *  Create a dictionary of values from the Document Body and Blob Store
- *
- *  @param body      body of document
- *  @param blobStore blobStore attachement dictionary
- *  @param context   context from Core Data
- *  @param version   version
- *
- *  @return dictionary
- */
-- (NSDictionary *)valuesFromDocumentBody:(NSDictionary *)body
-                           withBlobStore:(NSDictionary *)blobStore
-                             withContext:(NSManagedObjectContext *)context
-                              versionPtr:(uint64_t *)version;
-
-/**
- *  Internal
- */
-- (NSManagedObject *)managedObjectForEntityName:(NSString *)name
-                                referenceObject:(NSString *)ref
-                                        context:(NSManagedObjectContext *)context;
+/** @name Replicating with a remote Cloudant datastore */
 
 /**
  * Create a CDTReplicator object set up to replicate changes from the
@@ -127,7 +157,18 @@ typedef NS_ENUM(NSInteger, CDTIncrementalStoreErrors) {
  *
  *  @return a CDTReplicator instance which can be used to start and
  *  stop the replication itself, or `nil` on error.
-*/
+ */
 - (CDTISReplicator *)replicatorThatPullsFromURL:(NSURL *)remoteURL withError:(NSError **)error;
+
+/* Internal methods */
+
+- (NSDictionary *)valuesFromDocumentBody:(NSDictionary *)body
+                           withBlobStore:(NSDictionary *)blobStore
+                             withContext:(NSManagedObjectContext *)context
+                              versionPtr:(uint64_t *)version;
+
+- (NSManagedObject *)managedObjectForEntityName:(NSString *)name
+                                referenceObject:(NSString *)ref
+                                        context:(NSManagedObjectContext *)context;
 
 @end
