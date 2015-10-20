@@ -106,7 +106,17 @@ Here's a
 
 ### Running the tests
 
-Run the following at the command line:
+You can run the tests from Xcode using the standard test launching techniques (e.g. CMD-U to run all tests in the selected scheme).
+
+The remote tests use a local instance of CouchDB to test DB push and pull operations.
+You can set up a local CouchDB server with the following commands (assuming you already have homebrew setup):
+
+```
+brew install couchdb
+launchctl load /usr/local/opt/couchdb/homebrew.mxcl.couchdb.plist
+```
+
+You can also run the tests from the command line:
 
 ```
 xcodebuild -workspace CDTIncrementalStoreTest/CDTIncrementalStoreTest.xcworkspace -scheme CDTIS_iOSTests test | xcpretty -c
@@ -116,10 +126,10 @@ xcodebuild -workspace CDTIncrementalStoreTest/CDTIncrementalStoreTest.xcworkspac
 To test on a specific device you need to specify `-destination`:
 
 ```
-// iOS
+# iOS
 xcodebuild -workspace CDTIncrementalStoreTest/CDTIncrementalStoreTest.xcworkspace -scheme CDTIS_iOSTests -destination 'platform=iOS Simulator,OS=latest,name=iPhone 4S' test | xcpretty -c
 
-// Mac OS X
+# Mac OS X
 xcodebuild -workspace CDTIncrementalStoreTest/CDTIncrementalStoreTest.xcworkspace -scheme CDTIS_OSXTests -destination 'platform=OS X' test | xcpretty -c
 ```
 
