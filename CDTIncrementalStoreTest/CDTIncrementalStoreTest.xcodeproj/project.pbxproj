@@ -40,7 +40,6 @@
 		4D8845AF1B10E137009431EC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D8845AD1B10E137009431EC /* MainMenu.xib */; };
 		4DB036FC1B0BB3F600FDB44B /* CDTIS_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB036FB1B0BB3F600FDB44B /* CDTIS_iOSTests.m */; };
 		4DB037201B0BB41800FDB44B /* CDTIS_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0371F1B0BB41800FDB44B /* CDTIS_OSXTests.m */; };
-		4DB0372A1B0BBAAC00FDB44B /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4DB036FA1B0BB3F600FDB44B /* Info.plist */; };
 		D44A129546037B0AB90AC86F /* libPods-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 99D19CB070F9C07186D572BE /* libPods-osx.a */; };
 		F4230E06D1CC75D499E04A97 /* libPods-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CC1304FC94BD131DB54BBF10 /* libPods-ios.a */; };
 /* End PBXBuildFile section */
@@ -450,7 +449,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4DB0372A1B0BBAAC00FDB44B /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
