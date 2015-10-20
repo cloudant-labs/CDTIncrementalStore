@@ -34,14 +34,12 @@
 		4D8845811B10DFE2009431EC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D8845801B10DFE2009431EC /* ViewController.m */; };
 		4D8845841B10DFE2009431EC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D8845821B10DFE2009431EC /* Main.storyboard */; };
 		4D8845861B10DFE2009431EC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D8845851B10DFE2009431EC /* Images.xcassets */; };
-		4D8845891B10DFE2009431EC /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D8845871B10DFE2009431EC /* LaunchScreen.xib */; };
 		4D8845A81B10E137009431EC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D8845A71B10E137009431EC /* AppDelegate.m */; };
 		4D8845AA1B10E137009431EC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D8845A91B10E137009431EC /* main.m */; };
 		4D8845AC1B10E137009431EC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D8845AB1B10E137009431EC /* Images.xcassets */; };
 		4D8845AF1B10E137009431EC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D8845AD1B10E137009431EC /* MainMenu.xib */; };
 		4DB036FC1B0BB3F600FDB44B /* CDTIS_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB036FB1B0BB3F600FDB44B /* CDTIS_iOSTests.m */; };
 		4DB037201B0BB41800FDB44B /* CDTIS_OSXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB0371F1B0BB41800FDB44B /* CDTIS_OSXTests.m */; };
-		4DB037291B0BBAAB00FDB44B /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4DB036FA1B0BB3F600FDB44B /* Info.plist */; };
 		4DB0372A1B0BBAAC00FDB44B /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4DB036FA1B0BB3F600FDB44B /* Info.plist */; };
 		D44A129546037B0AB90AC86F /* libPods-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 99D19CB070F9C07186D572BE /* libPods-osx.a */; };
 		F4230E06D1CC75D499E04A97 /* libPods-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CC1304FC94BD131DB54BBF10 /* libPods-ios.a */; };
@@ -90,7 +88,6 @@
 		4D8845801B10DFE2009431EC /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		4D8845831B10DFE2009431EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4D8845851B10DFE2009431EC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		4D8845881B10DFE2009431EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		4D8845A21B10E137009431EC /* CDTIS_OSXAppTests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CDTIS_OSXAppTests.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D8845A51B10E137009431EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D8845A61B10E137009431EC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -190,7 +187,6 @@
 				4D8845801B10DFE2009431EC /* ViewController.m */,
 				4D8845821B10DFE2009431EC /* Main.storyboard */,
 				4D8845851B10DFE2009431EC /* Images.xcassets */,
-				4D8845871B10DFE2009431EC /* LaunchScreen.xib */,
 				4D8845781B10DFE2009431EC /* Supporting Files */,
 			);
 			path = CDTIS_iOSAppTest;
@@ -430,7 +426,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D8845841B10DFE2009431EC /* Main.storyboard in Resources */,
-				4D8845891B10DFE2009431EC /* LaunchScreen.xib in Resources */,
 				4D8845861B10DFE2009431EC /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -448,7 +443,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4DB037291B0BBAAB00FDB44B /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -607,14 +601,6 @@
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		4D8845871B10DFE2009431EC /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				4D8845881B10DFE2009431EC /* Base */,
-			);
-			name = LaunchScreen.xib;
-			sourceTree = "<group>";
-		};
 		4D8845AD1B10E137009431EC /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -631,6 +617,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = BrandAsset;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -679,6 +666,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = BrandAsset;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -839,10 +827,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -892,10 +877,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
