@@ -98,9 +98,12 @@ the `CDTIncrementalStore`:
 
 ## Example Application
 
-There is an example application based on
-[Apple's iPhoneCoreDataRecipes][recipe] and can be found in this
-[git tree][gitrecipe].
+An example application with detailed instructions on how to convert
+a CoreData application to use CDTIncrementalStore can be found in this
+[GitHub repo][gitrecipe].
+The application is based on [Apple's iPhoneCoreDataRecipes][recipe] and
+illustrates standard CoreData interactions with CDTIncrementalStore as
+well as replication to a remote Cloudant datastore.
 
 ## Contributing to the project
 
@@ -133,7 +136,7 @@ These can be found in the [docs](docs) directory.
 
 [recipe]: https://developer.apple.com/library/ios/samplecode/iPhoneCoreDataRecipes/Introduction/Intro.html "iPhoneCoreDataRecipes"
 
-[gitrecipe]: http://github.com/jimix/iphonecoredatarecipes "Git Tree of iPhoneCoreDataRecipes"
+[gitrecipe]: https://github.com/mkistler/CDTIS_iPhoneCoreDataRecipes "GitHub Repo of CDTIS_iPhoneCoreDataRecipes"
 
 
 <!--  LocalWords:  CDTIncrementalStore Cloudant CDTDatastore Podfile
