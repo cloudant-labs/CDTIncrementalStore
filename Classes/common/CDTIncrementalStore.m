@@ -26,7 +26,7 @@
 #import "CDTISObjectModel.h"
 
 #ifdef HAS_NSBatchUpdateRequest
-/**
+/*
  *  Currently NSBatchUpdateResult does not supply setters.
  *  We replicate the definition of the object but make them readwrite.
  *  Later, we cast it back to the original class.. so far it works.
@@ -79,26 +79,26 @@ static NSString *const CDTISObjectModelKey = @"objectModel";
 // allows selection of different code paths
 // Use this instead of #ifdef's so the code are actually gets compiled
 
-/**
+/*
  *  If true, will simply delete the database object with no considerations
  */
 static BOOL CDTISDeleteAggresively = NO;
 
-/**
+/*
  *  The backing store will drop the document body if there is a JSON
  *  serialization error. When this happens there is no failure condition or
  *  error reported.  So we read it back and make sure the body isn't empty.
  */
 static BOOL CDTISReadItBack = YES;
 
-/**
+/*
  *  Default log level.
  *  Setting it to DDLogLevelOff does not turn it off, but will simply
  *  not adjust it.
  */
 static DDLogLevel CDTISEnableLogging = DDLogLevelOff;
 
-/**
+/*
  *  Detect if the hashes changed and update the stored object model.
  *  Turn this on if you would like to migrate objects into the same store.
  *
@@ -106,17 +106,17 @@ static DDLogLevel CDTISEnableLogging = DDLogLevelOff;
  */
 static BOOL CDTISUpdateStoredObjectModel = NO;
 
-/**
+/*
  *  Check entity version mismatches which could cause problems
  */
 static BOOL CDTISCheckEntityVersions = NO;
 
-/**
+/*
  *  Check for the exisitence of subentities that we may be ignorning
  */
 static BOOL CDTISCheckForSubEntities = NO;
 
-/**
+/*
  *	Support batch update requests.
  */
 static BOOL CDTISSupportBatchUpdates = YES;
@@ -124,7 +124,7 @@ static BOOL CDTISSupportBatchUpdates = YES;
 @implementation CDTIncrementalStore
 
 #pragma mark - Init
-/**
+/*
  *  Registers this NSPersistentStore.
  *  You must invoke this method before a custom subclass of NSPersistentStore
  *  can be loaded into a persistent store coordinator.
@@ -141,7 +141,7 @@ static BOOL CDTISSupportBatchUpdates = YES;
         CDTISSupportBatchUpdates = NO;
     }
 
-    /**
+    /*
      *  We post to:
      *  - CDTDATASTORE_LOG_CONTEXT
      *  - CDTREPLICATION_LOG_CONTEXT
@@ -176,7 +176,7 @@ static BOOL CDTISSupportBatchUpdates = YES;
 }
 
 #pragma mark - Utils
-/**
+/*
  *  Generate a unique identifier
  *
  *  @return A unique ID
@@ -186,7 +186,7 @@ static NSString *uniqueID(NSString *label)
     return [NSString stringWithFormat:@"%@-%@-%@", CDTISPrefix, label, TDCreateUUID()];
 }
 
-/**
+/*
  * It appears that CoreData will convert an NSString reference object to an
  * NSNumber if it can, so we make sure we always use a string.
  *
@@ -203,7 +203,7 @@ static NSString *uniqueID(NSString *label)
     return ref;
 }
 
-/**
+/*
  *  Checks to see if the entity hashes match
  *
  *  @param entity   The entity you want to compare
@@ -224,7 +224,7 @@ static BOOL badEntityVersion(NSEntityDescription *entity, NSDictionary *metadata
     return YES;
 }
 
-/**
+/*
  *  Checks to see if an object ID matches the metadata.
  *
  *  @param moid     Object ID
@@ -265,7 +265,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return xform;
 }
 
-/**
+/*
  *  used for logging so we don't leach out the developer keys
  *
  *  @param url URL
@@ -280,7 +280,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
 
 #pragma mark - property encode
 
-/**
+/*
  *  Insert an NSData binary object into the "blob" store
  *
  *  @param blob  nbinary data
@@ -301,15 +301,15 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return name;
 }
 
-/**
+/*
  *  Create a dictionary (for JSON) that encodes an attribute.
- *  The array represents a tuple of strings:
- *  * type
- *  * _optional_ information
- *  * encoded object
+ *  The dictionary contains:
+ *    * name : value entry giving the attribute name and (possibly encoded) value
+ *    * _optional_ metadata for the attribute in an entry named CDTISMakeMeta(name)
  *
  *  @param attribute The attribute
  *  @param value     The object
+ *  @param blobStore The blobStore
  *  @param error     Error
  *
  *  @return Encoded array
@@ -326,18 +326,6 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     if (!value) oops(@"no nil allowed");
 
     switch (type) {
-        case NSUndefinedAttributeType: {
-            if (error) {
-                NSString *str =
-                    [NSString localizedStringWithFormat:@"%@ attribute type: %@",
-                                                        CDTISUndefinedAttributeType, @(type)];
-                NSDictionary *ui = @{NSLocalizedDescriptionKey : str};
-                *error = [NSError errorWithDomain:CDTISErrorDomain
-                                             code:CDTISErrorUndefinedAttributeType
-                                         userInfo:ui];
-            }
-            return nil;
-        }
         case NSStringAttributeType: {
             NSString *str = value;
             return @{
@@ -367,7 +355,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
                 [self encodeBlob:data withName:name inStore:blobStore withMIMEType:mimeType];
             return @{
                 name : bytes,
-                CDTISMakeMeta(name) : @{CDTISMIMETypeKey : @"application/octet-stream"}
+                CDTISMakeMeta(name) : @{CDTISMIMETypeKey : mimeType}
             };
         }
         case NSTransformableAttributeType: {
@@ -494,23 +482,24 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
                 CDTISMakeMeta(name) : [NSDictionary dictionaryWithDictionary:meta]
             };
         }
-        default:
-            break;
-    }
-
-    if (error) {
-        NSString *str = [NSString
-            localizedStringWithFormat:@"type %@: is not of " @"NSNumber: %@ = %@", @(type),
-                                      attribute.name, NSStringFromClass([value class])];
-        *error = [NSError errorWithDomain:CDTISErrorDomain
-                                     code:CDTISErrorNaN
-                                 userInfo:@{NSLocalizedDescriptionKey : str}];
+		case NSUndefinedAttributeType:
+		default: {
+			if (error) {
+				NSString *str =
+				[NSString localizedStringWithFormat:@"Undefined attribute type: %@", @(type)];
+				NSDictionary *ui = @{NSLocalizedDescriptionKey : str};
+				*error = [NSError errorWithDomain:CDTISErrorDomain
+											 code:CDTISErrorUndefinedAttributeType
+										 userInfo:ui];
+			}
+			return nil;
+		}
     }
 
     return nil;
 }
 
-/**
+/*
  *  Encode a relation as a dictionary of strings:
  *  * entity name
  *  * ref/docID
@@ -535,7 +524,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return ref;
 }
 
-/**
+/*
  *  Encode a complete relation, both "to-one" and "to-many"
  *
  *  @param rel   relation
@@ -569,10 +558,11 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     };
 }
 
-/**
+/*
  *  Get all the properties of a managed object and put them in a dictionary
  *
  *  @param mo managed object
+ *  @param blobStore The blobStore
  *
  *  @return dictionary
  */
@@ -602,7 +592,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
             NSRelationshipDescription *rel = prop;
             enc = [self encodeRelation:rel withValue:value error:&err];
         } else if ([prop isKindOfClass:[NSFetchedPropertyDescription class]]) {
-            /**
+            /*
              *  The incremental store should never see this, if it did it would
              * make NoSQL "views" interesting
              */
@@ -629,7 +619,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
 }
 
 #pragma mark - property decode
-/**
+/*
  *  Create an Object ID from the information decoded in
  *  [encodeRelationFromManagedObject](@ref encodeRelationFromManagedObject)
  *
@@ -652,7 +642,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return moid;
 }
 
-/**
+/*
  *  Extract the binary object for the "blob" store
  *
  *  @param name  Key
@@ -666,11 +656,12 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return [att dataFromAttachmentContent];
 }
 
-/**
+/*
  *  Get the object from the encoded property
  *
  *  @param name    name of object
  *  @param body    Dictionary representing the document
+ *  @param blobStore The blobStore
  *  @param context Context for the object
  *
  *  @return object or nil if no object exists
@@ -783,7 +774,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
 }
 
 #pragma mark - database methods
-/**
+/*
  *  Insert a managed object to the database
  *
  *  @param mo    Managed Object
@@ -823,7 +814,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     }
 
     if (CDTISReadItBack) {
-        /**
+        /*
          *  See CDTISReadItBack
          */
         rev = [self.datastore getDocumentWithId:newRev.docId error:&err];
@@ -838,7 +829,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return YES;
 }
 
-/**
+/*
  *  Update existing managed object
  *
  *  @param mo    Managed Object
@@ -859,7 +850,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return [self updateDocumentID:docID withChanges:changes entity:entity error:error];
 }
 
-/**
+/*
  *  Update existing document in the database
  *
  *  @param docID    Document ID
@@ -927,7 +918,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
         [upRev.attachments addEntriesFromDictionary:blobStore];
     }
 
-    /**
+    /*
      *  > ***Note***:
      *  >
      *  > Since the properties of the entity are being updated/modified, there is
@@ -956,7 +947,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     }
 
     if (CDTISReadItBack) {
-        /**
+        /*
          *  See CDTISReadItBack
          */
         upedRev = [self.datastore getDocumentWithId:upRev.docId error:&err];
@@ -971,12 +962,12 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return YES;
 }
 
-/**
+/*
  *  Delete a managed object from the database
  *
  *  > ***Warning***: it is assumed that CoreData will handle any cascading
  *  > deletes that are required.
-
+ *
  *  @param mo    Managed Object
  *  @param error Error
  *
@@ -988,7 +979,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     NSManagedObjectID *moid = [mo objectID];
     NSString *docID = [self stringReferenceObjectForObjectID:moid];
 
-    /**
+    /*
      *  @See CDTISDeleteAggresively
      */
     if (CDTISDeleteAggresively) {
@@ -1012,7 +1003,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return YES;
 }
 
-/**
+/*
  *  optLock??
  *
  *  @param mo    Managed Object
@@ -1026,6 +1017,16 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return NO;
 }
 
+/*
+ *  Create a dictionary of values from the Document Body and Blob Store
+ *
+ *  @param body      body of document
+ *  @param blobStore blobStore attachement dictionary
+ *  @param context   context from Core Data
+ *  @param version   version
+ *
+ *  @return dictionary
+ */
 - (NSDictionary *)valuesFromDocumentBody:(NSDictionary *)body
                            withBlobStore:(NSDictionary *)blobStore
                              withContext:(NSManagedObjectContext *)context
@@ -1055,7 +1056,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return [NSDictionary dictionaryWithDictionary:values];
 }
 
-/**
+/*
  *  Create a dictionary of values for the attributes of a Managed Object from
  *  a docId/ref.
  *
@@ -1085,7 +1086,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
                              versionPtr:version];
 }
 
-/**
+/*
  *  Initialize database
  *
  *  @param error Error
@@ -1098,7 +1099,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     NSURL *dir = [self URL];
     NSString *path = [dir path];
 
-    /**
+    /*
      *  check if the directory exists, or needs to be created
      */
     BOOL isDir;
@@ -1129,7 +1130,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
             return NO;
         }
     }
-    /**
+    /*
      * The URL we are given is actually a directory.  The backing store is
      * free to create as many files and subdirectories it needs.  So for an
      * actual name we use something constatn and vanilla.
@@ -1154,7 +1155,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
         [[CDTReplicatorFactory alloc] initWithDatastoreManager:manager];
     if (!repFactory) {
         NSString *msg = [NSString
-            stringWithFormat:@"%@: Could not create replication factory for push", CDTISType];
+            stringWithFormat:@"%@: Could not create replication factory for datastore", CDTISType];
         CDTLogError(CDTREPLICATION_LOG_CONTEXT, @"%@", msg);
         if (error) {
             NSDictionary *userInfo = @{NSLocalizedFailureReasonErrorKey : msg};
@@ -1173,7 +1174,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     return YES;
 }
 
-/**
+/*
  *  Encode version hashes, which come to us as a dictionary of inline data
  *  objects, so we encode them as a hex string.
  *
@@ -1201,9 +1202,10 @@ static NSDictionary *encodeVersionHashes(NSDictionary *hashes)
     return omd;
 }
 
-/**
+/*
  *  Update the metaData for CoreData in our own database
  *
+ *  @param metadata metadata object
  *  @param docID The docID for the metaData object in our database
  *  @param error error
  *
@@ -1251,7 +1253,7 @@ static NSDictionary *encodeVersionHashes(NSDictionary *hashes)
     return YES;
 }
 
-/**
+/*
  *  Decode version hashes, which come to us as a dictionary of hex strings
  *  that we convert back into NSData objects.
  *
@@ -1270,7 +1272,7 @@ static NSDictionary *decodeVersionHashes(NSDictionary *hashes)
     return [NSDictionary dictionaryWithDictionary:newHashes];
 }
 
-/**
+/*
  *  We need to swizzle the hashes if they exist
  *
  *  @param storedMetaData <#storedMetaData description#>
@@ -1292,7 +1294,7 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     return [NSDictionary dictionaryWithDictionary:metadata];
 }
 
-/**
+/*
  *  Retrieve the CoreData metaData, if we do not have a copy then we create
  *  a new one.
  *
@@ -1350,7 +1352,7 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     return metaData;
 }
 
-/**
+/*
  *  Check that the metadata is still sane.
  *
  *  > *Note*: check is trivial right now
@@ -1375,13 +1377,13 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     return YES;
 }
 
-/**
+/*
  *  Our own setter for metadata
  *  Quote the docs:
  *  > Subclasses must override this property to provide storage and
  *  > persistence for the store metadata.
  *
- *  @param metadata
+ *  @param metadata metadata object
  */
 - (void)setMetadata:(NSDictionary *)metadata
 {
@@ -1492,7 +1494,7 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     return YES;
 }
 
-/**
+/*
  *  Create an array of sort descriptors for the fetch request
  *
  *  @param fetchRequest fetchRequest
@@ -1512,7 +1514,7 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     return [NSArray arrayWithArray:sds];
 }
 
-/**
+/*
  *  Ensure appropriate index is created for fetch request
  *
  *  Note: Queries can include unindexed fields.
@@ -1568,13 +1570,13 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     }
 }
 
-/**
+/*
  *  Process comparison predicates
  *
  *  The queries currently supported by the backing store are described in the query.md
  *  doc in the doc directory.
  *
- *  @param fetchRequest
+ *  @param cp a comparison predicate to be converted to a predicate dictionary
  *
  *  @return predicate dictionary
  */
@@ -1736,7 +1738,7 @@ NSString *kNorOperator = @"$nor";
     return nil;
 }
 
-/**
+/*
  *  create a query dictionary for the backing store
  *  > *Note*: the predicates are included in this dictionary
  *
@@ -1839,7 +1841,7 @@ NSString *kNorOperator = @"$nor";
               withContext:(NSManagedObjectContext *)context
                     error:(NSError **)error
 {
-    /**
+    /*
      *  The document, [Responding to Fetch
      * Requests](https://developer.apple.com/library/ios/documentation/DataManagement/Conceptual/IncrementalStorePG/ImplementationStrategy/ImplementationStrategy.html#//apple_ref/doc/uid/TP40010706-CH2-SW6),
      *  suggests that we get the entity from the fetch request.
@@ -1855,7 +1857,7 @@ NSString *kNorOperator = @"$nor";
                 NSLocalizedFailureReasonErrorKey : @"Error processing predicate for fetch request"
             };
             *error = [NSError errorWithDomain:CDTISErrorDomain
-                                         code:CDTISErrorNotSupported
+                                         code:CDTISErrorRequestNotSupported
                                      userInfo:userInfo];
         }
         return nil;
@@ -1873,8 +1875,8 @@ NSString *kNorOperator = @"$nor";
                                           fields:nil
                                             sort:sort];
 
-    NSFetchRequestResultType fetchType = [fetchRequest resultType];
-    switch (fetchType) {
+    NSFetchRequestResultType resultType = [fetchRequest resultType];
+    switch (resultType) {
         case NSManagedObjectResultType: {
             NSMutableArray *results = [NSMutableArray array];
             [result
@@ -1910,10 +1912,10 @@ NSString *kNorOperator = @"$nor";
             break;
     }
     NSString *s =
-        [NSString localizedStringWithFormat:@"Unknown request fetch type: %@", fetchRequest];
+        [NSString localizedStringWithFormat:@"Unknown fetch request result type: %d", resultType];
     if (error) {
         *error = [NSError errorWithDomain:CDTISErrorDomain
-                                     code:CDTISErrorExectueRequestFetchTypeUnkown
+                                     code:CDTISErrorResultTypeUnknown
                                  userInfo:@{NSLocalizedFailureReasonErrorKey : s}];
     }
     return nil;
@@ -1989,7 +1991,7 @@ NSString *kNorOperator = @"$nor";
                     @"Error processing predicate for batch update request"
             };
             *error = [NSError errorWithDomain:CDTISErrorDomain
-                                         code:CDTISErrorNotSupported
+                                         code:CDTISErrorRequestNotSupported
                                      userInfo:userInfo];
         }
         return nil;
@@ -2079,7 +2081,7 @@ NSString *kNorOperator = @"$nor";
     NSString *s = [NSString localizedStringWithFormat:@"Unknown request type: %@", @(requestType)];
     if (error) {
         *error = [NSError errorWithDomain:CDTISErrorDomain
-                                     code:CDTISErrorExectueRequestTypeUnkown
+                                     code:CDTISErrorRequestTypeUnknown
                                  userInfo:@{NSLocalizedFailureReasonErrorKey : s}];
     }
     return nil;

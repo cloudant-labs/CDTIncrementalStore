@@ -17,7 +17,7 @@
 
 #import <CoreData/CoreData.h>
 
-/**
+/*
  *  This is how I like to assert, it stops me in the debugger.
  *
  *  *Why not use exceptions?*
@@ -45,7 +45,6 @@ NSString *CDTISStringFromData(NSData *data);
 NSData *CDTISDataFromString(NSString *str);
 NSString *CDTISMakeMeta(NSString *s);
 
-NSString *const CDTISUndefinedAttributeType;
 NSString *const CDTISInteger16AttributeType;
 NSString *const CDTISInteger32AttributeType;
 NSString *const CDTISInteger64AttributeType;

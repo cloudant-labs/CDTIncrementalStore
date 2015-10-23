@@ -77,7 +77,6 @@ NSData *CDTISDataFromString(NSString *str)
 NSString *CDTISMakeMeta(NSString *s) { return [CDTISMeta stringByAppendingString:s]; }
 
 // encodings for floating point special values
-NSString *const CDTISUndefinedAttributeType = @"undefined";
 NSString *const CDTISInteger16AttributeType = @"int16";
 NSString *const CDTISInteger32AttributeType = @"int32";
 NSString *const CDTISInteger64AttributeType = @"int64";
@@ -102,10 +101,10 @@ static NSString *const CDTISPropertiesKey = @"properties";
 
 @implementation CDTISProperty
 
-/**
+/*
  * Defines the attribute meta data that is stored in the object.
  *
- *  @param att
+ *  @param attribute attribute description
  *
  *  @return initialized object
  */

@@ -19,6 +19,8 @@
 #import "CDTIncrementalStore.h"
 #import "CDTISObjectModel.h"
 
+#import "CDTDatastore+Conflicts.h"
+
 @interface CDTISReplicator ()
 
 @property (nonatomic, strong) CDTIncrementalStore *incrementalStore;
