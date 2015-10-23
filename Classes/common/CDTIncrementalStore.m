@@ -24,7 +24,6 @@
 
 #import "CDTIncrementalStore.h"
 #import "CDTISObjectModel.h"
-#import "CDTISGraphviz.h"
 
 #ifdef HAS_NSBatchUpdateRequest
 /*
@@ -59,11 +58,6 @@
 @property (nonatomic, strong) CDTISObjectModel *objectModel;
 @property (nonatomic, strong) CDTReplicatorFactory *repFactory;
 
-/*
- *  This holds the "dot" directed graph, see [dotMe](@ref dotMe)
- */
-@property (nonatomic, strong) NSData *graph;
-
 @end
 
 #pragma mark - string constants
@@ -96,11 +90,6 @@ static BOOL CDTISDeleteAggresively = NO;
  *  error reported.  So we read it back and make sure the body isn't empty.
  */
 static BOOL CDTISReadItBack = YES;
-
-/*
- *  Will update the Dot graph on save request
- */
-static BOOL CDTISDotMeUpdate = NO;
 
 /*
  *  Default log level.
@@ -1968,10 +1957,6 @@ NSString *kNorOperator = @"$nor";
         }
     }
 
-    if (CDTISDotMeUpdate) {
-        NSLog(@"DotMe: %@", [self dotMe]);
-    }
-
     /* quote the docs:
      * > If the save request contains nil values for the
      * > inserted/updated/deleted/locked collections;
@@ -2184,34 +2169,6 @@ NSString *kNorOperator = @"$nor";
         [objectIDs addObject:moid];
     }
     return objectIDs;
-}
-
-/*
- *  Use the CDTISGraphviz to create a graph representation of the datastore
- *
- *  Once you have a database configured, in any form, you can simply call:
- *      [self dotMe]
- *
- *  What you get:
- *  * You may call this from your code or from the debugger (LLDB).
- *  * The result is stored as `self.graph`
- *  ** You can then use your favorite `writeTo` method.
- *
- *  @return A string that is the debugger command to dump the result
- *   into a file on the host.
- *
- *  > *Warning*: this replaces contents of an existing file but does not
- *  > truncate it. So if the original file was bigger there will be garbage
- *  > at the end.
- */
-- (NSString *)dotMe
-{
-    self.graph = [CDTISGraphviz dotDatastore:self.datastore withObjectModel:self.objectModel];
-    NSUInteger length = [self.graph length];
-
-    return
-        [NSString stringWithFormat:@"memory read --force --binary --outfile " @"%@ --count %@ %p",
-                                   @"/tmp/CDTIS.dot", @(length), [self.graph bytes]];
 }
 
 @end
