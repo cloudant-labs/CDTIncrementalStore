@@ -1912,7 +1912,7 @@ NSString *kNorOperator = @"$nor";
             break;
     }
     NSString *s =
-        [NSString localizedStringWithFormat:@"Unknown fetch request result type: %d", resultType];
+        [NSString localizedStringWithFormat:@"Unknown fetch request result type: %lu", (unsigned long)resultType];
     if (error) {
         *error = [NSError errorWithDomain:CDTISErrorDomain
                                      code:CDTISErrorResultTypeUnknown
