@@ -633,7 +633,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
                                             withRef:(NSString *)ref
                                         withContext:(NSManagedObjectContext *)context
 {
-    if (entityName.length == 0) {
+    if (entityName.length == 0 || ref.length == 0) {
         return nil;
     }
     NSEntityDescription *entity =
