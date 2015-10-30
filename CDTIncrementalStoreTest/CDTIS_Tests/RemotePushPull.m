@@ -304,5 +304,73 @@
     XCTAssertNoThrow([mo valueForKey:@"checkit"]);
 }
 
+- (void)testPushPullAttachments
+{
+	int max = 10;
+	NSError *err = nil;
+
+	NSManagedObjectContext *moc = [self createNumbersWithImagesAndSave:max];
+
+	// there is actually `max` docs plus the metadata document
+	int docs = 2*max + 1;
+
+	/**
+	 *  Push
+	 */
+	CDTISReplicator *pusher = [self pushMe];
+	NSInteger count = pusher.replicator.changesTotal;
+	XCTAssertTrue(count == docs, @"push: unexpected processed objects: %@ != %d", @(count), docs);
+
+	[self removeLocalDatabase];
+
+	/**
+	 *  Out of band tally of the number of documents in the remote replicant
+	 */
+	NSString *all_docs =
+	[NSString stringWithFormat:@"%@/_all_docs?limit=0", [self.storeURL absoluteString]];
+	UNIHTTPRequest *req = [UNIRest get:^(UNISimpleRequest *request) {
+		[request setUrl:all_docs];
+	}];
+	UNIHTTPJsonResponse *json = [req asJson];
+	UNIJsonNode *body = json.body;
+	NSDictionary *dic = body.object;
+	NSNumber *total_rows = dic[@"total_rows"];
+	count = [total_rows integerValue];
+	XCTAssertTrue(count == docs, @"oob: unexpected number of objects: %@ != %d", @(count), docs);
+
+	/**
+	 *  New context for pull
+	 */
+	moc = self.managedObjectContext;
+	XCTAssertNotNil(moc, @"could not create Context");
+
+	CDTISReplicator *puller = [self pullMe];
+	count = puller.replicator.changesTotal;
+	XCTAssertTrue(count == docs, @"pull: unexpected processed objects: %@ != %d", @(count), docs);
+
+	/**
+	 *  Read it back
+	 */
+	NSArray *results;
+	NSSortDescriptor *sd = [NSSortDescriptor sortDescriptorWithKey:@"number" ascending:YES];
+
+	NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"REntry"];
+	fr.shouldRefreshRefetchedObjects = YES;
+	fr.sortDescriptors = @[ sd ];
+
+	results = [moc executeFetchRequest:fr error:&err];
+	XCTAssertNotNil(results, @"Expected results: %@", err);
+	count = [results count];
+	XCTAssertTrue(count == max, @"fetch: unexpected processed objects: %@ != %d", @(count), max);
+
+	long long last = -1;
+	for (REntry *e in results) {
+		long long val = [e.number longLongValue];
+		XCTAssertTrue(val < max, @"entry is out of range [0, %d): %lld", max, val);
+		XCTAssertTrue(val == last + 1, @"unexpected entry %@: %@", @(val), e);
+		++last;
+	}
+}
+
 
 @end

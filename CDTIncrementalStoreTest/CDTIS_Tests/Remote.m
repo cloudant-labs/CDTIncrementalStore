@@ -10,7 +10,7 @@
 #import "Remote.h"
 
 @implementation REntry
-@dynamic number, string, created, stuff, conflict;
+@dynamic number, string, created, stuff, conflict, image;
 @end
 
 REntry *MakeREntry(NSManagedObjectContext *moc)
@@ -23,6 +23,27 @@ REntry *MakeREntry(NSManagedObjectContext *moc)
 @dynamic size, data, rentry;
 @end
 
+@implementation ImageToDataTransformer
++ (BOOL)allowsReverseTransformation { return YES; }
++ (Class)transformedValueClass { return [NSData class]; }
+- (id)transformedValue:(id)value {
+#if TARGET_OS_IPHONE
+	NSData *data = UIImageJPEGRepresentation(value, 1 /* least */);
+#else
+	NSData *data = [value representationUsingType:NSJPEGFileType
+										   properties:@{ NSImageCompressionFactor : @(1) /* least */ }];
+#endif
+	return data;
+}
+- (id)reverseTransformedValue:(id)value {
+#if TARGET_OS_IPHONE
+	UIImage *image = [[UIImage alloc] initWithData:value];
+#else
+	NSImage *image = [[NSImage alloc] initWithData:value];
+#endif
+	return image;
+}
+@end
 
 NSString *generateRandomString(int num) {
     NSMutableString* string = [NSMutableString stringWithCapacity:num];
@@ -300,6 +321,44 @@ NSString *generateRandomString(int num) {
 - (NSManagedObjectContext *)createNumbersAndSave:(int)max
 {
     return [self createNumbersAndSave:max withConflictID:0];
+}
+
+- (NSManagedObjectContext *)createNumbersWithImagesAndSave:(int)max
+{
+	NSError *err = nil;
+	// This will create the database
+	NSManagedObjectContext *moc = self.managedObjectContext;
+	XCTAssertNotNil(moc, @"could not create Context");
+
+	int dataSize = 64 * 1024;
+
+	// create some entries
+	for (int i = 0; i < max; i++) {
+		REntry *e = MakeREntry(moc);
+
+		e.number = @(i);
+		e.string = [NSString stringWithFormat:@"%u", (max * 10) + i];
+		e.created = [NSDate dateWithTimeIntervalSinceNow:0];
+		e.conflict = @(0);
+
+		// Create an image object for the new image.
+		NSManagedObject *imageObj = [NSEntityDescription insertNewObjectForEntityForName:@"Image" inManagedObjectContext:moc];
+
+		NSData *someData = [[NSFileHandle fileHandleForReadingAtPath:@"/dev/random"] readDataOfLength:dataSize];
+#if TARGET_OS_IPHONE
+		UIImage *anImage = [[UIImage alloc] initWithData:someData];
+#else
+		NSImage *anImage = [[NSImage alloc] initWithData:someData];
+#endif
+		[imageObj setValue:anImage forKey:@"image"];
+		e.image = imageObj;
+	}
+
+	// save to backing store
+	XCTAssertTrue([moc save:&err], @"MOC save failed");
+	XCTAssertNil(err, @"MOC save failed with error: %@", err);
+
+	return moc;
 }
 
 void setConflicts(NSArray *results, int conflictVal)

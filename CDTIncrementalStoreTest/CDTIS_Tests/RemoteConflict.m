@@ -18,24 +18,6 @@
 
 @implementation RemoteConflict
 
-- (NSURL *)createSecondaryDatabase:(NSString *)append
-{
-    XCTAssertTrue(([append length] > 0), @"append must no be empty");
-    if (!self.secondaryRemoteDatabaseNames) {
-        self.secondaryRemoteDatabaseNames = [NSMutableArray array];
-    }
-
-    NSString *sec = [self.primaryRemoteDatabaseName stringByAppendingString:append];
-    NSURL *secURL = [NSURL URLWithString:sec relativeToURL:self.remoteRootURL];
-    XCTAssertNotNil(secURL, "Secondary URL evaluated to nil?");
-
-    [self createRemoteDatabase:sec instanceURL:self.remoteRootURL];
-
-    [self.secondaryRemoteDatabaseNames addObject:sec];
-
-    return secURL;
-}
-
 - (NSArray *)doConflictWithReplicator:(CDTISReplicator *)replicator
                               context:(NSManagedObjectContext *)moc
                                 error:(NSError **)error

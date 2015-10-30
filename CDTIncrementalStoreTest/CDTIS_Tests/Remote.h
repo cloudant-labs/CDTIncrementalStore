@@ -36,13 +36,15 @@
 @property (nonatomic, strong) NSString *remoteDbPrefix;
 
 
--(void)createRemoteDatabase:(NSString*)name instanceURL:(NSURL*)instanceURL;
--(void)deleteRemoteDatabase:(NSString*)name instanceURL:(NSURL*)instanceURL;
+- (void)createRemoteDatabase:(NSString*)name instanceURL:(NSURL*)instanceURL;
+- (void)deleteRemoteDatabase:(NSString*)name instanceURL:(NSURL*)instanceURL;
+- (NSURL *)createSecondaryDatabase:(NSString *)append;
 
 - (void)removeLocalDatabase;
 
 - (NSManagedObjectContext *)createNumbersAndSave:(int)max withConflictID:(int)conflict;
 - (NSManagedObjectContext *)createNumbersAndSave:(int)max;
+- (NSManagedObjectContext *)createNumbersWithImagesAndSave:(int)max;
 
 - (CDTISReplicator *)pushToURL:(NSURL *)url;
 - (CDTISReplicator *)pushMe;
@@ -60,6 +62,7 @@ void setConflicts(NSArray *results, int conflictVal);
 @property (nonatomic, strong) NSDate *created;
 @property (nonatomic, strong) NSSet *stuff;
 @property (nonatomic, strong) NSNumber *conflict;
+@property (nonatomic, strong) NSManagedObject *image;
 @end
 
 @interface REntry (CoreDataGeneratedAccessors)
@@ -77,4 +80,7 @@ REntry *MakeREntry(NSManagedObjectContext *moc);
 @property (nonatomic, retain) NSNumber *size;
 @property (nonatomic, retain) NSString *data;
 @property (nonatomic, retain) REntry *rentry;
+@end
+
+@interface ImageToDataTransformer : NSValueTransformer
 @end

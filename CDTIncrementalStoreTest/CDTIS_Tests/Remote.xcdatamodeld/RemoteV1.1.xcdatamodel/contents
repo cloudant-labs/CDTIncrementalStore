@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14D136" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9057" systemVersion="14F1021" minimumToolsVersion="Xcode 4.3">
+    <entity name="Image" syncable="YES">
+        <attribute name="image" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <relationship name="entry" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="REntry" inverseName="image" inverseEntity="REntry" syncable="YES"/>
+    </entity>
     <entity name="REntry" syncable="YES">
         <attribute name="checkit" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
         <attribute name="conflict" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="created" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="number" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="string" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="image" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Image" inverseName="entry" inverseEntity="Image" syncable="YES"/>
         <relationship name="stuff" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stuff" inverseName="entry" inverseEntity="Stuff" syncable="YES"/>
     </entity>
     <entity name="Stuff" syncable="YES">
@@ -14,7 +19,8 @@
         <relationship name="entry" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="REntry" inverseName="stuff" inverseEntity="REntry" syncable="YES"/>
     </entity>
     <elements>
-        <element name="REntry" positionX="-63" positionY="-18" width="128" height="135"/>
+        <element name="REntry" positionX="-63" positionY="-18" width="128" height="150"/>
         <element name="Stuff" positionX="151" positionY="-54" width="128" height="88"/>
+        <element name="Image" positionX="54" positionY="27" width="128" height="75"/>
     </elements>
 </model>
