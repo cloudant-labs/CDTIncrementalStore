@@ -794,12 +794,11 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
 
     if (badObjectVersion(moid, self.metadata)) oops(@"hash mismatch?: %@", moid);
 
-    CDTMutableDocumentRevision *newRev = [CDTMutableDocumentRevision revision];
+    CDTDocumentRevision *newRev = [CDTDocumentRevision revisionWithDocId:docID];
     NSMutableDictionary *blobStore = [NSMutableDictionary dictionary];
 
     // do the actual attributes first
-    newRev.docId = docID;
-    newRev.body = [self propertiesFromManagedObject:mo withBlobStore:blobStore];
+    newRev.body = [[self propertiesFromManagedObject:mo withBlobStore:blobStore] mutableCopy];
     newRev.body[CDTISObjectVersionKey] = @"1";
     newRev.body[CDTISEntityNameKey] = [entity name];
     newRev.body[CDTISIdentifierKey] = [[[mo objectID] URIRepresentation] absoluteString];
@@ -911,7 +910,7 @@ static BOOL badObjectVersion(NSManagedObjectID *moid, NSDictionary *metadata)
     NSNumber *v = [NSNumber numberWithUnsignedLongLong:version];
     props[CDTISObjectVersionKey] = [v stringValue];
 
-    CDTMutableDocumentRevision *upRev = [oldRev mutableCopy];
+    CDTDocumentRevision *upRev = [oldRev copy];
 
     // update attachments first
     if ([blobStore count]) {
@@ -1221,7 +1220,7 @@ static NSDictionary *encodeVersionHashes(NSDictionary *hashes)
                     self.URL, err);
         return NO;
     }
-    CDTMutableDocumentRevision *upRev = [oldRev mutableCopy];
+    CDTDocumentRevision *upRev = [oldRev copy];
 
     NSDictionary *newHashes = metadata[NSStoreModelVersionHashesKey];
     if (newHashes) {
@@ -1317,12 +1316,8 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
         NSDictionary *omd = [self updateObjectModel];
 
         // store it so we can get it back the next time
-        CDTMutableDocumentRevision *newRev = [CDTMutableDocumentRevision revision];
-        newRev.docId = CDTISMetaDataDocID;
-        newRev.body = @{
-            CDTISMetaDataKey : metaData,
-            CDTISObjectModelKey : omd,
-        };
+        CDTDocumentRevision *newRev = [CDTDocumentRevision revisionWithDocId:CDTISMetaDataDocID];
+        newRev.body = [@{ CDTISMetaDataKey : metaData, CDTISObjectModelKey : omd } mutableCopy];
 
         rev = [self.datastore createDocumentFromRevision:newRev error:&err];
         if (!rev) {
@@ -1339,7 +1334,7 @@ NSDictionary *decodeCoreDataMeta(NSDictionary *storedMetaData)
     self.objectModel = [[CDTISObjectModel alloc] initWithDictionary:omd];
 
     NSDictionary *storedMetaData = rev.body[CDTISMetaDataKey];
-    CDTMutableDocumentRevision *upRev = [rev mutableCopy];
+    CDTDocumentRevision *upRev = [rev copy];
     CDTDocumentRevision *upedRev = [self.datastore updateDocumentFromRevision:upRev error:&err];
     if (!upedRev) {
         if (error) *error = err;

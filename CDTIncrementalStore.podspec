@@ -17,7 +17,7 @@ EOT
 
 Pod::Spec.new do |s|
   s.name         = "CDTIncrementalStore"
-  s.version      = "0.1.3"
+  s.version      = "0.2.0"
   s.summary      = "CDTIncrementalStore allows Core Data Frameworks to target CDTDatastore."
   s.description  = <<-DESC
                     CDTIncreamentalStore provides an Incremental Store
@@ -41,6 +41,6 @@ Pod::Spec.new do |s|
   s.ios.exclude_files = 'Classes/osx'
   s.osx.exclude_files = 'Classes/ios'
 
-  s.dependency 'CDTDatastore', '~> 0.16'
+  s.dependency 'CDTDatastore', '~> 1.0'
   s.frameworks =  'CoreData'
 end
