@@ -30,7 +30,7 @@ Pod::Spec.new do |s|
   s.homepage     = "http://github.com/jimix/CDTIncrementalStore"
   s.license      = {:type => 'Apache', :text => license}
   s.author       = { "IBM, Inc." => "jimix@pobox.com" }
-  s.source       = { :git => "https://github.com/jimix/CDTIncrementalStore.git", :tag => s.version.to_s }
+  s.source       = { :git => "https://github.com/cloudant-labs/CDTIncrementalStore.git", :tag => s.version.to_s }
 
   s.ios.deployment_target = '7.0'
   s.osx.deployment_target = '10.9'
