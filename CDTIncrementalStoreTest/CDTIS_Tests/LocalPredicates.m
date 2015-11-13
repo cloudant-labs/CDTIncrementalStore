@@ -69,7 +69,7 @@ static const BOOL sql = NO;
     expected = [entries filteredArrayUsingPredicate:fr.predicate];
 
     XCTAssertTrue([results count] == [expected count], @"results count is %ld but should be %ld",
-                  [results count], [expected count]);
+                  (unsigned long)[results count], (unsigned long)[expected count]);
 
     check = [results filteredArrayUsingPredicate:fr.predicate];
 
@@ -215,7 +215,7 @@ static const BOOL sql = NO;
     results = [moc executeFetchRequest:fr error:&err];
     XCTAssertNotNil(results, @"Expected results: %@", err);
 
-    XCTAssertTrue([results count] == 1, @"results count is %ld but should be %ld", [results count],
+    XCTAssertTrue([results count] == 1, @"results count is %ld but should be %ld", (unsigned long)[results count],
                   (long)1);
 
     /**
@@ -391,7 +391,7 @@ static const BOOL sql = NO;
     expected = [entries filteredArrayUsingPredicate:fr.predicate];
 
     XCTAssertTrue([results count] == [expected count], @"results count is %ld but should be %ld",
-                  [results count], [expected count]);
+                  (unsigned long)[results count], (unsigned long)[expected count]);
 
     check = [results filteredArrayUsingPredicate:fr.predicate];
 
@@ -409,7 +409,7 @@ static const BOOL sql = NO;
     expected = [entries filteredArrayUsingPredicate:fr.predicate];
 
     XCTAssertTrue([results count] == [expected count], @"results count is %ld but should be %ld",
-                  [results count], [expected count]);
+                  (unsigned long)[results count], (unsigned long)[expected count]);
 
     check = [results filteredArrayUsingPredicate:fr.predicate];
 
