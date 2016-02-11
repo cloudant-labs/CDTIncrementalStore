@@ -124,7 +124,7 @@ These can be found in the [docs](docs) directory.
 
 [cloudant sync]: https://github.com/cloudant/CDTDatastore "Cloudant Sync iOS datastore library"
 
-[cocoapods]: http://cocoapods.org "Cocoa Pods"
+[cocoapods]: http://cocoapods.org "CocoaPods"
 
 [bridging header]: https://developer.apple.com/library/ios/documentation/swift/conceptual/buildingcocoaapps/MixandMatch.html "Bridging Headers"
 
